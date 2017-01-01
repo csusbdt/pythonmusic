@@ -6,7 +6,7 @@
 #define B   (2.0 * PI / 44100.0)
 #define TRANSITION_MILLIS 50
 #define TRANSITION_SAMPLES (44.1 * TRANSITION_MILLIS)
-#define MAX_OSCILLATORS 4
+#define MAX_OSCILLATORS 8
 #define MAX_AMPLITUDE  (0x7FFFFFFF >> 2)
 
 typedef Sint32 AudioSample;
@@ -23,7 +23,6 @@ typedef struct {
 	double delta_a1;
 } Oscillator;
 
-//int quitting = 0;
 static SDL_AudioDeviceID	audio_dev;
 static SDL_AudioSpec		audio_spec;
 static Oscillator oscillators[MAX_OSCILLATORS];
@@ -56,7 +55,6 @@ static void mix_oscillator(Oscillator * o, AudioSample * buf, int len) {
 		buf[i] += o->a0 * sin(o->b0 * o->s) + o->a1 * sin(o->b1 * o->s);
 		++o->s;
 	}
-//printf("%f %f %f %f\n", o->a0, o->a1, o->b0, o->b1);
 }
 
 /* Fill audio sample buffer with samples.  Called in audio thread. */
@@ -65,7 +63,6 @@ static void sdl_audio_callback(void * userdata, Uint8 * stream, int len) {
 	int samples;
 	int i;
 
-	//if (quitting) return;
 	memset(stream, audio_spec.silence, len);
 	buf = (AudioSample *) stream;
 	samples = len / sizeof(AudioSample);
@@ -99,12 +96,6 @@ void init() {
 
 	SDL_PauseAudioDevice(audio_dev, 0);
 }
-
-//void stop() {
-	//quitting = 1;
-//	SDL_PauseAudioDevice(audio_dev, 1);
-//	SDL_CloseAudioDevice(audio_dev);
-//}
 
 void set_oscillator(int i, double f, double a) {
 	if (i < 0 || i >= MAX_OSCILLATORS) fatal("In set_oscillator: invalid index into oscillators.");
